@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Verification System</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Lucide icons as SVG components
+        const CheckCircle = () => (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        );
+
+        const XCircle = () => (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        );
+
+        const Award = () => (
+            <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+        );
+
+        const Users = () => (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+        );
+
+        const Download = () => (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+        );
+
+        const Upload = () => (
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+        );
+
+        function CertificateSystem() {
+            const [formData, setFormData] = useState({
+                name: '',
+                email: '',
+                phone: '',
+                teamName: ''
+            });
+            const [verificationStatus, setVerificationStatus] = useState(null);
+            const [loading, setLoading] = useState(false);
+            const [showCertificate, setShowCertificate] = useState(false);
+            const [isAdmin, setIsAdmin] = useState(false);
+            const [certificates, setCertificates] = useState({});
+
+            // IMPORTANT: Replace YOUR-USERNAME with your GitHub username
+            // Replace the certificateUrl with your actual certificate filenames
+            const GITHUB_USERNAME = 'YOUR-USERNAME'; // Change this to your GitHub username
+            const REPO_NAME = 'certificate-verification'; // Change if you used a different name
+            const BASE_URL = `https://${GITHUB_USERNAME}.github.io/${REPO_NAME}/certificates/`;
+            
+            // Add your participants here
+            const registeredParticipants = [
+                {
+                    name: 'John Doe',
+                    email: 'john@example.com',
+                    phone: '1234567890',
+                    teamName: 'Team Alpha',
+                    certificateId: 'CERT-2026-001',
+                    certificateUrl: BASE_URL + 'john_doe_certificate.jpg' // Change filename
+                },
+                {
+                    name: 'Jane Smith',
+                    email: 'jane@example.com',
+                    phone: '9876543210',
+                    teamName: 'Team Beta',
+                    certificateId: 'CERT-2026-002',
+                    certificateUrl: BASE_URL + 'jane_smith_certificate.jpg' // Change filename
+                },
+                {
+                    name: 'Alice Johnson',
+                    email: 'alice@example.com',
+                    phone: '5551234567',
+                    teamName: 'Team Gamma',
+                    certificateId: 'CERT-2026-003',
+                    certificateUrl: BASE_URL + 'alice_johnson_certificate.jpg' // Change filename
+                }
+                // Add more participants following the same format
+            ];
+
+            const handleInputChange = (e) => {
+                setFormData({
+                    ...formData,
+                    [e.target.name]: e.target.value
+                });
+            };
+
+            const normalizeString = (str) => {
+                return str.toLowerCase().trim();
+            };
+
+            const handleSubmit = () => {
+                setLoading(true);
+                
+                setTimeout(() => {
+                    const participant = registeredParticipants.find(p => 
+                        normalizeString(p.name) === normalizeString(formData.name) &&
+                        normalizeString(p.email) === normalizeString(formData.email) &&
+                        p.phone.replace(/\D/g, '') === formData.phone.replace(/\D/g, '') &&
+                        normalizeString(p.teamName) === normalizeString(formData.teamName)
+                    );
+
+                    if (participant) {
+                        setVerificationStatus({
+                            success: true,
+                            message: 'Verification Successful! Your certificate is ready.',
+                            participant: participant
+                        });
+                    } else {
+                        setVerificationStatus({
+                            success: false,
+                            message: 'Verification Failed. Please check your details and try again.'
+                        });
+                    }
+                    setLoading(false);
+                }, 1500);
+            };
+
+            const viewCertificate = () => {
+                setShowCertificate(true);
+            };
+
+            const downloadCertificate = () => {
+                const link = document.createElement('a');
+                link.href = verificationStatus.participant.certificateUrl;
+                link.download = `Certificate_${verificationStatus.participant.name.replace(/\s+/g, '_')}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            const resetForm = () => {
+                setFormData({
+                    name: '',
+                    email: '',
+                    phone: '',
+                    teamName: ''
+                });
+                setVerificationStatus(null);
+                setShowCertificate(false);
+            };
+
+            const handleFileUpload = (participantId, event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        setCertificates({
+                            ...certificates,
+                            [participantId]: e.target.result
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            if (isAdmin) {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-red-950 p-8">
+                        <div className="max-w-6xl mx-auto">
+                            <div className="bg-gray-900 rounded-2xl shadow-xl p-8 border border-red-900">
+                                <div className="flex justify-between items-center mb-8">
+                                    <h1 className="text-3xl font-bold text-red-500">Admin Panel - Manage Certificates</h1>
+                                    <button
+                                        onClick={() => setIsAdmin(false)}
+                                        className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                                    >
+                                        Back to Verification
+                                    </button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    {registeredParticipants.map((participant, index) => (
+                                        <div key={index} className="border border-red-900 bg-black rounded-lg p-6 hover:shadow-lg hover:shadow-red-900/50 transition-shadow">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <h3 className="font-bold text-lg text-red-500">{participant.name}</h3>
+                                                    <p className="text-sm text-gray-400">Email: {participant.email}</p>
+                                                    <p className="text-sm text-gray-400">Phone: {participant.phone}</p>
+                                                    <p className="text-sm text-gray-400">Team: {participant.teamName}</p>
+                                                    <p className="text-sm text-gray-400">Certificate ID: {participant.certificateId}</p>
+                                                </div>
+                                                <div className="flex flex-col justify-center">
+                                                    <label className="cursor-pointer">
+                                                        <div className="border-2 border-dashed border-red-600 rounded-lg p-4 hover:border-red-500 transition-colors text-center bg-gray-900">
+                                                            <div className="flex justify-center mb-2 text-red-500"><Upload /></div>
+                                                            <p className="text-sm text-gray-400">
+                                                                {certificates[participant.certificateId] ? 'Change Certificate' : 'Upload Certificate'}
+                                                            </p>
+                                                            <input
+                                                                type="file"
+                                                                accept="image/*"
+                                                                onChange={(e) => handleFileUpload(participant.certificateId, e)}
+                                                                className="hidden"
+                                                            />
+                                                        </div>
+                                                    </label>
+                                                    {(certificates[participant.certificateId] || participant.certificateUrl) && (
+                                                        <div className="mt-2">
+                                                            <img
+                                                                src={certificates[participant.certificateId] || participant.certificateUrl}
+                                                                alt="Certificate preview"
+                                                                className="w-full h-32 object-cover rounded border-2 border-red-900"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="mt-8 p-4 bg-red-950 rounded-lg border border-red-900">
+                                    <p className="text-sm text-red-400">
+                                        <strong>Instructions:</strong> Upload certificate images for each participant. Supported formats: JPG, PNG. 
+                                        Users will receive these certificates after successful verification.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (showCertificate && verificationStatus?.success) {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-black via-red-950 to-gray-900 p-8">
+                        <div className="max-w-4xl mx-auto">
+                            <div className="bg-gray-900 rounded-lg shadow-2xl p-8 border-2 border-red-600">
+                                <div className="text-center mb-6">
+                                    <div className="flex justify-center mb-4 text-red-500"><Award /></div>
+                                    <h2 className="text-2xl font-bold text-red-500 mb-2">Your Certificate</h2>
+                                    <p className="text-gray-400">Certificate ID: {verificationStatus.participant.certificateId}</p>
+                                </div>
+
+                                <div className="mb-6">
+                                    <img
+                                        src={verificationStatus.participant.certificateUrl}
+                                        alt="Certificate"
+                                        className="w-full rounded-lg border-4 border-red-600 shadow-lg shadow-red-900/50"
+                                    />
+                                </div>
+
+                                <div className="flex gap-4 justify-center">
+                                    <button
+                                        onClick={downloadCertificate}
+                                        className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors font-semibold flex items-center gap-2"
+                                    >
+                                        <Download />
+                                        Download Certificate
+                                    </button>
+                                    <button
+                                        onClick={resetForm}
+                                        className="bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-semibold border border-red-600"
+                                    >
+                                        Back to Verification
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-black via-red-950 to-gray-900 p-8">
+                    <div className="max-w-2xl mx-auto">
+                        <div className="bg-gray-900 rounded-2xl shadow-2xl p-8 border-2 border-red-600">
+                            <div className="text-center mb-8">
+                                <div className="flex justify-center mb-4 text-red-500">
+                                    <Award />
+                                </div>
+                                <h1 className="text-3xl font-bold text-red-500 mb-2">Certificate Verification</h1>
+                                <p className="text-gray-400">Enter your registration details to receive your certificate</p>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-semibold text-red-500 mb-2">
+                                        Full Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-3 bg-black border-2 border-red-900 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition placeholder-gray-600"
+                                        placeholder="Enter your full name"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-red-500 mb-2">
+                                        Email Address
+                                    </label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-3 bg-black border-2 border-red-900 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition placeholder-gray-600"
+                                        placeholder="your.email@example.com"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-red-500 mb-2">
+                                        Phone Number
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        name="phone"
+                                        value={formData.phone}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-3 bg-black border-2 border-red-900 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition placeholder-gray-600"
+                                        placeholder="1234567890"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-red-500 mb-2">
+                                        Team Name
+                                    </label>
+                                    <div className="relative">
+                                        <div className="absolute left-3 top-3.5 text-red-500">
+                                            <Users />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            name="teamName"
+                                            value={formData.teamName}
+                                            onChange={handleInputChange}
+                                            className="w-full pl-12 pr-4 py-3 bg-black border-2 border-red-900 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition placeholder-gray-600"
+                                            placeholder="Enter your team name"
+                                        />
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={handleSubmit}
+                                    disabled={loading}
+                                    className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:bg-gray-700 disabled:cursor-not-allowed"
+                                >
+                                    {loading ? 'Verifying...' : 'Verify & Get Certificate'}
+                                </button>
+                            </div>
+
+                            {verificationStatus && (
+                                <div className={`mt-6 p-4 rounded-lg flex items-start gap-3 border-2 ${
+                                    verificationStatus.success 
+                                        ? 'bg-red-950 border-red-600' 
+                                        : 'bg-gray-950 border-gray-700'
+                                }`}>
+                                    <div className={verificationStatus.success ? 'text-red-500' : 'text-gray-500'}>
+                                        {verificationStatus.success ? <CheckCircle /> : <XCircle />}
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className={`font-semibold ${
+                                            verificationStatus.success ? 'text-red-400' : 'text-gray-400'
+                                        }`}>
+                                            {verificationStatus.message}
+                                        </p>
+                                        {verificationStatus.success && (
+                                            <button
+                                                onClick={viewCertificate}
+                                                className="mt-3 bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors font-semibold"
+                                            >
+                                                View Certificate
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="mt-8 p-4 bg-red-950 rounded-lg border border-red-900">
+                                <p className="text-sm text-red-400 font-semibold mb-2">Demo Credentials:</p>
+                                <p className="text-xs text-gray-400">Name: John Doe | Email: john@example.com | Phone: 1234567890 | Team: Team Alpha</p>
+                            </div>
+
+                            <div className="mt-4 text-center">
+                                <button
+                                    onClick={() => setIsAdmin(true)}
+                                    className="text-sm text-red-500 hover:text-red-400 underline"
+                                >
+                                    Admin Panel (Upload Certificates)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<CertificateSystem />, document.getElementById('root'));
+    </script>
+</body>
+</html>
