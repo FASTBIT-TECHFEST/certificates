@@ -65,13 +65,12 @@
             const [isAdmin, setIsAdmin] = useState(false);
             const [certificates, setCertificates] = useState({});
 
-            // IMPORTANT: Replace YOUR-USERNAME with your GitHub username
-            // Replace the certificateUrl with your actual certificate filenames
-            const GITHUB_USERNAME = 'FASTBIT-TECHFEST'; // Change this to your GitHub username
-            const REPO_NAME = 'certificates'; // Change if you used a different name
-            const BASE_URL = `https://fastbit-techfest.github.io/certificates/`;
+            // Your GitHub configuration
+            const GITHUB_USERNAME = 'FASTBIT-TECHFEST';
+            const REPO_NAME = 'certificates';
+            const BASE_URL = `https://${GITHUB_USERNAME}.github.io/${REPO_NAME}/certificates/`;
             
-            // Add your participants here
+            // Add your participants here - Replace with your actual data
             const registeredParticipants = [
                 {
                     name: 'John Doe',
@@ -79,7 +78,7 @@
                     phone: '1234567890',
                     teamName: 'Team Alpha',
                     certificateId: 'CERT-2026-001',
-                    certificateUrl: BASE_URL + 'john_doe_certificate.png' // Change filename
+                    certificateUrl: BASE_URL + 'john_doe_certificate.png'
                 },
                 {
                     name: 'Jane Smith',
@@ -87,7 +86,7 @@
                     phone: '9876543210',
                     teamName: 'Team Beta',
                     certificateId: 'CERT-2026-002',
-                    certificateUrl: BASE_URL + 'jane_smith_certificate.jpg' // Change filename
+                    certificateUrl: BASE_URL + 'jane_smith_certificate.jpg'
                 },
                 {
                     name: 'Alice Johnson',
@@ -95,7 +94,7 @@
                     phone: '5551234567',
                     teamName: 'Team Gamma',
                     certificateId: 'CERT-2026-003',
-                    certificateUrl: BASE_URL + 'alice_johnson_certificate.jpg' // Change filename
+                    certificateUrl: BASE_URL + 'alice_johnson_certificate.jpg'
                 }
                 // Add more participants following the same format
             ];
@@ -142,13 +141,27 @@
                 setShowCertificate(true);
             };
 
-            const downloadCertificate = () => {
-                const link = document.createElement('a');
-                link.href = verificationStatus.participant.certificateUrl;
-                link.download = `Certificate_${verificationStatus.participant.name.replace(/\s+/g, '_')}.png`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+            const downloadCertificate = async () => {
+                try {
+                    const imageUrl = verificationStatus.participant.certificateUrl;
+                    const response = await fetch(imageUrl);
+                    const blob = await response.blob();
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.download = `Certificate_${verificationStatus.participant.name.replace(/\s+/g, '_')}.jpg`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // Clean up
+                    window.URL.revokeObjectURL(blobUrl);
+                } catch (error) {
+                    console.error('Download failed:', error);
+                    // Fallback: open in new tab
+                    window.open(verificationStatus.participant.certificateUrl, '_blank');
+                }
             };
 
             const resetForm = () => {
@@ -416,7 +429,4 @@
         ReactDOM.render(<CertificateSystem />, document.getElementById('root'));
     </script>
 </body>
-
 </html>
-
-
