@@ -65,12 +65,13 @@
             const [isAdmin, setIsAdmin] = useState(false);
             const [certificates, setCertificates] = useState({});
 
-            // Your GitHub configuration
-            const GITHUB_USERNAME = 'FASTBIT-TECHFEST';
-            const REPO_NAME = 'certificates';
+            // IMPORTANT: Replace YOUR-USERNAME with your GitHub username
+            // Replace the certificateUrl with your actual certificate filenames
+            const GITHUB_USERNAME = 'YOUR-USERNAME'; // Change this to your GitHub username
+            const REPO_NAME = 'certificate-verification'; // Change if you used a different name
             const BASE_URL = `https://${GITHUB_USERNAME}.github.io/${REPO_NAME}/certificates/`;
             
-            // Add your participants here - Replace with your actual data
+            // Add your participants here
             const registeredParticipants = [
                 {
                     name: 'John Doe',
@@ -78,7 +79,7 @@
                     phone: '1234567890',
                     teamName: 'Team Alpha',
                     certificateId: 'CERT-2026-001',
-                    certificateUrl: BASE_URL + 'john_doe_certificate.png'
+                    certificateUrl: BASE_URL + 'john_doe_certificate.jpg' // Change filename
                 },
                 {
                     name: 'Jane Smith',
@@ -86,7 +87,7 @@
                     phone: '9876543210',
                     teamName: 'Team Beta',
                     certificateId: 'CERT-2026-002',
-                    certificateUrl: BASE_URL + 'jane_smith_certificate.jpg'
+                    certificateUrl: BASE_URL + 'jane_smith_certificate.jpg' // Change filename
                 },
                 {
                     name: 'Alice Johnson',
@@ -94,7 +95,7 @@
                     phone: '5551234567',
                     teamName: 'Team Gamma',
                     certificateId: 'CERT-2026-003',
-                    certificateUrl: BASE_URL + 'alice_johnson_certificate.jpg'
+                    certificateUrl: BASE_URL + 'alice_johnson_certificate.jpg' // Change filename
                 }
                 // Add more participants following the same format
             ];
